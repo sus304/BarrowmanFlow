@@ -1,0 +1,56 @@
+{
+	"Define Comment": {
+		"Default_Unit": "m_kg_sec",
+		"C.G.": "Center of Gravity from nose tip"
+	},
+
+	"System": {
+		"Result Directory": "./Result"
+	},
+
+	"Name": "H-44",
+	
+	"Structure": {
+		"Length [m]": 2.5,
+		"Diameter [m]": 0.154,
+
+		"All Mass [kg]": 5.0,
+		"Dry Mass [kg]": 6.0,
+		"Burnout Mass [kg]": 5.0,
+
+		"All Length-C.G. [m]": 1.2,
+		"Dry Length-C.G. [m]": 1.2,
+		"Burnout Length-C.G. [m]": 1.2
+	},
+
+	"Nose":{
+		"Shape": "DoubleCone",
+		"Length": 1.0
+	},
+
+	"Boattail":{
+		"Diameter [m]": 0.100,
+		"Length [m]": 0.1
+	},
+
+	"Fin":{
+		"Offset from Body End [mm]": 0.0,
+		"Root Chord [mm]":400.0,
+		"Tip Chord [mm]": 300.0,
+		"Half Span [mm]": 150.0,
+		"Thickness [mm]": 2.0,
+		"Dencity [g/cm3]": 2.7,
+		"Poisson": 0.3
+	},
+
+	"Aero":{
+		"Cd File": "Cd.csv",
+		"File Exist":true,		
+		"Constant Cd":0.55,		
+		"Length-C.P. [m]": 2.0,
+		"Normal Coefficient CNa": 12.0,
+		"Roll Dumping Moment Coefficient Clp": 0.01,
+		"Pitch Dumping Moment Coefficient Cmq": 0.3
+	}
+	
+}
