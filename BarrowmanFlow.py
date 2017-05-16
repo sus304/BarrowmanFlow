@@ -143,8 +143,24 @@ def integral(*components):
   return CNa, Cmq, Lcp
 
 class Graph:
+  # グラフによる機体形状の可視化
+  # 単純な単段ロケットのみ対応
+  # @ToDo:汎用性を上げる
   def add_point(self, array, x, y):
-      return np.vstack((array, np.array([x, y])))
+    return np.vstack((array, np.array([x, y])))
+
+  def add_body_reverse(self, point_list):
+    point_parse = point_list[:-1,:]
+    for point in point_parse[::-1]:
+      point_list = self.add_point(point_list, point[0], point[1] * (-1))
+    return point_list
+
+  def add_fin_reverse(self, point_list):
+    point_list = self.add_point(point_list, point_list[0,0], point_list[0,1]) # 1st fin close   
+    point_2nd = np.array([point_list[0,0], -point_list[0,1]])
+    for point in point_list[1:]:
+      point_2nd = self.add_point(point_2nd, point[0], point[1] * (-1)) # 2nd fin point
+    return point_list, point_2nd
 
   def __init__(self, d_body, l_body, Lcg, Lcp, *components):
     r_body = 0.5 * d_body
@@ -157,6 +173,7 @@ class Graph:
           self.point_nose = np.array([0.0, 0.0])
         self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, r_body)
         self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, 0.0)
+        self.point_nose = self.add_body_reverse(self.point_nose)        
 
       elif isinstance(obj, TaperBody):
         if hasattr(self, 'point_taper'):
@@ -166,6 +183,7 @@ class Graph:
         self.point_taper = self.add_point(self.point_taper, obj.distance, 0.5*obj.d_before)
         self.point_taper = self.add_point(self.point_taper, obj.distance+obj.l_taper, 0.5*obj.d_after)
         self.point_taper = self.add_point(self.point_taper, obj.distance+obj.l_taper, 0.0)
+        self.point_taper = self.add_body_reverse(self.point_taper)
 
       elif isinstance(obj, Fin):
         if hasattr(self, 'point_fin'):
@@ -175,25 +193,13 @@ class Graph:
         self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle, r_body+obj.span)
         self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle+obj.Ct, r_body+obj.span)
         self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cr, r_body)
-
-  def add_body_reverse(self, point_list):
-    point_parse = point_list[1:-1,:]
-    for point in point_parse:
-      point_list = self.add_point(point_list, point[0], point[1] * (-1))
-    return point_list
-
-  def add_fin_reverse(self, point_list):
-    point_parse = point_list
-    for point in point_parse:
-      point_list = self.add_point(point_list, point[0], point[1] * (-1))
-    return point_list
+        self.point_fin, self.point_fin_2nd = self.add_fin_reverse(self.point_fin)
 
   def plot(self):
     plt.close('all')
     plt.figure(0)
-    for point_list in [self.point_nose, self.point_taper, self.point_fin]:
+    for point_list in [self.point_nose, self.point_taper, self.point_fin, self.point_fin_2nd]:
       try:
-        point_list = self.add_body_reverse(point_list)
         plt.plot(point_list[:,0], point_list[:,1])
       except:
         pass
