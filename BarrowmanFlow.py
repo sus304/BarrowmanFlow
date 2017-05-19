@@ -7,9 +7,13 @@ class AeroObj:
   d_body = 0.0
   l_body = 0.0
   Lcg = 0.0
+  Lcp = 0.0
+  CNa = 0.0
+  Cmq = 0.0
+  Cnr = 0.0
 
   def __init__(self):
-    if AeroObj.d_body == 0.0:
+    if AeroObj.d_body <= 0.0 or AeroObj.l_body <= 0.0 or AeroObj.Lcg <= 0.0:
       print('Error:Not initialized. BarrowmanFlow.initialize(...)')
     self.CNa = 0.0
     self.inertia_coefficient = 0.0
@@ -130,17 +134,18 @@ def initialize(d_body, l_body, Lcg):
   AeroObj.Lcg = Lcg
 
 def integral(*components):
-  CNa = 0.0
-  Cmq = 0.0
-  Cnr = 0.0 # Non Use : damping Roll
-  Lcp = 0.0
   for obj in components:
-    CNa += obj.CNa
-    Lcp += obj.CNa * obj.Lcp
-    Cmq -= 4.0 * (0.5 * obj.CNa * ((obj.Lcp - AeroObj.Lcg) / AeroObj.l_body) ** 2)
-  Lcp /= CNa
+    AeroObj.CNa += obj.CNa
+    AeroObj.Lcp += obj.CNa * obj.Lcp
+    AeroObj.Cmq -= 4.0 * (0.5 * obj.CNa * ((obj.Lcp - AeroObj.Lcg) / AeroObj.l_body) ** 2)
+  AeroObj.Lcp /= AeroObj.CNa
 
-  return CNa, Cmq, Lcp
+def get_Lcp():
+  return AeroObj.Lcp
+def get_CNa():
+  return AeroObj.CNa
+def get_Cmq():
+  return AeroObj.Cmq
 
 class Graph:
   # グラフによる機体形状の可視化
@@ -162,9 +167,8 @@ class Graph:
       point_2nd = self.add_point(point_2nd, point[0], point[1] * (-1)) # 2nd fin point
     return point_list, point_2nd
 
-  def __init__(self, d_body, l_body, Lcg, Lcp, *components):
-    self.r_body = 0.5 * d_body
-    self.l_body = l_body
+  def __init__(self, *components):
+    self.r_body = 0.5 * AeroObj.d_body
     
 
     for obj in components:
@@ -173,8 +177,8 @@ class Graph:
           pass
         else:
           self.point_nose = np.array([0.0, 0.0])
-        self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, self.r_body)
-        self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, 0.0)
+        self.point_nose = self.add_point(self.point_nose, obj.LD*AeroObj.d_body, self.r_body)
+        self.point_nose = self.add_point(self.point_nose, obj.LD*AeroObj.d_body, 0.0)
         self.point_nose = self.add_body_reverse(self.point_nose)        
 
       elif isinstance(obj, TaperBody):
@@ -199,7 +203,7 @@ class Graph:
   
   def add_body(self):
     start_x = max(self.point_nose[:,0])
-    end_x = self.l_body
+    end_x = AeroObj.l_body
     self.point_body = np.array([start_x, -self.r_body])
     self.point_body = self.add_point(self.point_body, start_x, self.r_body)
     self.point_body = self.add_point(self.point_body, end_x, self.r_body)
@@ -221,11 +225,13 @@ class Graph:
           ymax = max(point_list[:,1])
       except:
         pass
-    print(xmax, ymax)
-    plt.xlim([0.0, np.ceil(xmax+0.5)])
-    plt.ylim([np.floor(-ymax-0.2), np.ceil(ymax+0.2)])
+    plt.plot(AeroObj.Lcg, 0.0, 'o', color='black', label='Lcg')
+    plt.plot(AeroObj.Lcp, 0.0, 'o', color='red', label='Lcp')
+    plt.xlim([0.0, np.ceil(xmax)])
+    plt.ylim([np.floor(-ymax), np.ceil(ymax)])
     ax = plt.gca()
     aspect = 1.0
     ax.set_aspect(aspect)
     plt.grid()
+    plt.legend()
     plt.show()

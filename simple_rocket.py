@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import BarrowmanFlow as bf
 
 ################## User Input ###################
-length_body = 1.7 # [m] from nose tip to body. without tail
+length_body = 2.7 # [m] from nose tip to body. without tail
 diameter_body = 0.154 # [m]
 length_cg = 0.885 # [m] from nose tip
 
@@ -41,13 +41,12 @@ bf.initialize(diameter_body, length_body, length_cg)
 nose = bf.Nose(shape_nose, length_nose)
 fin = bf.Fin(root_chord, tip_chord, leading_edge_chord, span, length_body-offset_fin-root_chord)
 tail = bf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
-CNa, Cmq, Lcp = bf.integral(nose, fin, tail)
+bf.integral(nose, fin, tail)
 
 fin.flutter_speed(young_modulus, poisson_ratio, thickness_fin, max_altitude)
 
-graph = bf.Graph(diameter_body, length_body, length_cg, Lcp, nose, fin, tail)
+graph = bf.Graph(nose, fin, tail)
 graph.plot()
 
-print(CNa, Cmq, Lcp)
 print(np.max(fin.Vf))
 
