@@ -163,7 +163,9 @@ class Graph:
     return point_list, point_2nd
 
   def __init__(self, d_body, l_body, Lcg, Lcp, *components):
-    r_body = 0.5 * d_body
+    self.r_body = 0.5 * d_body
+    self.l_body = l_body
+    
 
     for obj in components:
       if isinstance(obj, Nose):
@@ -171,7 +173,7 @@ class Graph:
           pass
         else:
           self.point_nose = np.array([0.0, 0.0])
-        self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, r_body)
+        self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, self.r_body)
         self.point_nose = self.add_point(self.point_nose, obj.LD*d_body, 0.0)
         self.point_nose = self.add_body_reverse(self.point_nose)        
 
@@ -189,18 +191,41 @@ class Graph:
         if hasattr(self, 'point_fin'):
           pass
         else:
-          self.point_fin = np.array([obj.distance, r_body])
-        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle, r_body+obj.span)
-        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle+obj.Ct, r_body+obj.span)
-        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cr, r_body)
+          self.point_fin = np.array([obj.distance, self.r_body])
+        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle, self.r_body+obj.span)
+        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cle+obj.Ct, self.r_body+obj.span)
+        self.point_fin = self.add_point(self.point_fin, obj.distance+obj.Cr, self.r_body)
         self.point_fin, self.point_fin_2nd = self.add_fin_reverse(self.point_fin)
+  
+  def add_body(self):
+    start_x = max(self.point_nose[:,0])
+    end_x = self.l_body
+    self.point_body = np.array([start_x, -self.r_body])
+    self.point_body = self.add_point(self.point_body, start_x, self.r_body)
+    self.point_body = self.add_point(self.point_body, end_x, self.r_body)
+    self.point_body = self.add_point(self.point_body, end_x, -self.r_body)
+    self.point_body = self.add_point(self.point_body, start_x, -self.r_body)
 
   def plot(self):
     plt.close('all')
-    plt.figure(0)
-    for point_list in [self.point_nose, self.point_taper, self.point_fin, self.point_fin_2nd]:
+    plt.figure(0, figsize=(8, 4))
+    xmax = 0.0
+    ymax = 0.0
+    self.add_body()
+    for point_list in [self.point_body, self.point_nose, self.point_taper, self.point_fin, self.point_fin_2nd]:
       try:
-        plt.plot(point_list[:,0], point_list[:,1])
+        plt.plot(point_list[:,0], point_list[:,1], color='black')
+        if max(point_list[:,0]) > xmax:
+          xmax = max(point_list[:,0])
+        if max(point_list[:,1]) > ymax:
+          ymax = max(point_list[:,1])
       except:
         pass
+    print(xmax, ymax)
+    plt.xlim([0.0, np.ceil(xmax+0.5)])
+    plt.ylim([np.floor(-ymax-0.2), np.ceil(ymax+0.2)])
+    ax = plt.gca()
+    aspect = 1.0
+    ax.set_aspect(aspect)
+    plt.grid()
     plt.show()
