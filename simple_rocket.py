@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-
-import numpy as np
-import matplotlib.pyplot as plt
-
 import BarrowmanFlow as bf
 
 ################## User Input ###################
@@ -48,7 +44,7 @@ print('*=============Result==============*')
 print('Length of C.P.:', stage.Lcp, '[m]')
 print('Coefficient of Normal Force:', stage.CNa, '[deg^-1]')
 print('Coefficient of Pitch Damping Moment:', stage.Cmq, '[-]')
-print('Flutter Velocity:', np.max(fin.Vf), '[m/s]')
+print('Flutter Velocity:', max(fin.Vf), '[m/s]')
 print('*=================================*')
 
 stage.plot()
