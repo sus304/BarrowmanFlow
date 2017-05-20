@@ -37,16 +37,21 @@ leading_edge_chord = mm2m(leading_edge_chord)
 span = mm2m(span)
 thickness_fin = mm2m(thickness_fin)
 
-bf.initialize(diameter_body, length_body, length_cg)
+bf.initialize(diameter_body, length_body)
 nose = bf.Nose(shape_nose, length_nose)
 fin = bf.Fin(root_chord, tip_chord, leading_edge_chord, span, length_body-offset_fin-root_chord)
-tail = bf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
-bf.integral(nose, fin, tail)
-
 fin.flutter_speed(young_modulus, poisson_ratio, thickness_fin, max_altitude)
+tail = bf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
+stage = bf.integral(length_cg, nose, fin, tail)
 
-graph = bf.Graph(nose, fin, tail)
-graph.plot()
+print('*=============Result==============*')
+print('Length of C.P.:', stage.Lcp, '[m]')
+print('Coefficient of Normal Force:', stage.CNa, '[deg^-1]')
+print('Coefficient of Pitch Damping Moment:', stage.Cmq, '[-]')
+print('Flutter Velocity:', np.max(fin.Vf), '[m/s]')
+print('*=================================*')
 
-print(np.max(fin.Vf))
+stage.plot()
+
+
 
