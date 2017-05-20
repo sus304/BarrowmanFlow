@@ -1,6 +1,6 @@
 # BarrowmanFlow
 This program calculate rocket aerodynamics parameter.
-Calculated using Barrowman Method and apparent mass method based on slender body theory.
+Calculated using Barrowman method and apparent mass method based on slender body theory.
 
 BarrowmanFlow is a library for calculating aerodynamics. It is necessary to prepare driving scripts.The script describes the shape of aerodynamic elements.
 "simple_rocket.py" is a simple rocket calculation example.
