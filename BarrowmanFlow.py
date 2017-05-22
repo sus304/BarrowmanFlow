@@ -143,6 +143,7 @@ class Fin(AeroObj):
     AR = 2.0 * self.span / (self.Cr + self.Ct) # aspect ratio
     ramda = self.Ct / self.Cr # taper ratio
     shear = young / (2.0 * (1.0 + poisson)) # shear modulus
+    # Alt 0.0m から指定高度まで
     self.Vf = [Std_Atmo(alt)[3] * np.sqrt(shear * 10.0 ** 9 / ((1.337 * AR ** 3 * Std_Atmo(alt)[1] * (ramda + 1.0)) / (2.0 * (AR + 2.0) * (thickness / self.Cr) ** 3))) for alt in np.arange(0.0, altitude+10.0, 10.0)]
 
 def initialize(d_body, l_body):
