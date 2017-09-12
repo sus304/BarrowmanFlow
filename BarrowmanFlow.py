@@ -146,10 +146,6 @@ class Fin(AeroObj):
     # Alt 0.0m から指定高度まで
     self.Vf = [Std_Atmo(alt)[3] * np.sqrt(shear * 10.0 ** 9 / ((1.337 * AR ** 3 * Std_Atmo(alt)[1] * (ramda + 1.0)) / (2.0 * (AR + 2.0) * (thickness / self.Cr) ** 3))) for alt in np.arange(0.0, altitude+10.0, 10.0)]
 
-def initialize(d_body, l_body):
-  AeroObj.d_body = d_body
-  AeroObj.l_body = l_body
-
 class Stage:
   def __init__(self, d_body, l_body, Lcg, Lcp, CNa, Cmq, Cnr):
     self.d_body = d_body
@@ -165,6 +161,10 @@ class Stage:
     graph = Graph(self)
     graph.plot()
 
+def initialize(d_body, l_body):
+  AeroObj.d_body = d_body
+  AeroObj.l_body = l_body
+
 def integral(Lcg, *components):
   stage = Stage(AeroObj.d_body, AeroObj.l_body, Lcg, 0.0, 0.0, 0.0, 0.0)
   for obj in components:
@@ -172,6 +172,7 @@ def integral(Lcg, *components):
     stage.Lcp += obj.CNa * obj.Lcp
     stage.Cmq -= 4.0 * (0.5 * obj.CNa * ((obj.Lcp - Lcg) / AeroObj.l_body) ** 2)
     stage.components.append(obj)
+  stage.Clp = -AR/2pi
   stage.Lcp /= stage.CNa
 
   return stage
@@ -199,6 +200,7 @@ class Graph:
   def __init__(self, stage):
     self.Lcg = stage.Lcg
     self.Lcp = stage.Lcp
+    self.point_set = []
     for component in stage.components:
       if isinstance(component, Nose):
         if hasattr(self, 'point_nose'):
@@ -207,7 +209,8 @@ class Graph:
           self.point_nose = np.array([0.0, 0.0])
         self.point_nose = self.add_point(self.point_nose, component.LD*stage.d_body, 0.5*stage.d_body)
         self.point_nose = self.add_point(self.point_nose, component.LD*stage.d_body, 0.0)
-        self.point_nose = self.add_body_reverse(self.point_nose)        
+        self.point_nose = self.add_body_reverse(self.point_nose)
+        self.point_set.append(self.point_nose)       
 
       elif isinstance(component, TaperBody):
         if hasattr(self, 'point_taper'):
@@ -218,6 +221,7 @@ class Graph:
         self.point_taper = self.add_point(self.point_taper, component.distance+component.l_taper, 0.5*component.d_after)
         self.point_taper = self.add_point(self.point_taper, component.distance+component.l_taper, 0.0)
         self.point_taper = self.add_body_reverse(self.point_taper)
+        self.point_set.append(self.point_taper)               
 
       elif isinstance(component, Fin):
         if hasattr(self, 'point_fin'):
@@ -228,6 +232,9 @@ class Graph:
         self.point_fin = self.add_point(self.point_fin, component.distance+component.Cle+component.Ct, 0.5*stage.d_body+component.span)
         self.point_fin = self.add_point(self.point_fin, component.distance+component.Cr, 0.5*stage.d_body)
         self.point_fin, self.point_fin_2nd = self.add_fin_reverse(self.point_fin)
+        self.point_set.append(self.point_fin)
+        self.point_set.append(self.point_fin_2nd)                      
+        
     # add body
     start_x = max(self.point_nose[:,0])
     end_x = AeroObj.l_body
@@ -236,13 +243,14 @@ class Graph:
     self.point_body = self.add_point(self.point_body, end_x, 0.5*stage.d_body)
     self.point_body = self.add_point(self.point_body, end_x, -0.5*stage.d_body)
     self.point_body = self.add_point(self.point_body, start_x, -0.5*stage.d_body)
+    self.point_set.append(self.point_body)           
 
   def plot(self):
     plt.close('all')
     plt.figure(0, figsize=(8, 4))
     xmax = 0.0
     ymax = 0.0
-    for point_list in [self.point_body, self.point_nose, self.point_taper, self.point_fin, self.point_fin_2nd]:
+    for point_list in self.point_set:
       try:
         plt.plot(point_list[:,0], point_list[:,1], color='black')
         if max(point_list[:,0]) > xmax:

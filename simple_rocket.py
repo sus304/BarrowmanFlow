@@ -2,25 +2,25 @@
 import BarrowmanFlow as bf
 
 ################## User Input ###################
-length_body = 2.7 # [m] from nose tip to body. without tail
-diameter_body = 0.154 # [m]
-length_cg = 0.885 # [m] from nose tip
+length_body = 3.9663 # [m] from nose tip to body. without tail
+diameter_body = 0.183 # [m]
+length_cg = 2.541 # [m] from nose tip
 
-shape_nose = 'double' # 'ogive' or 'double' or 'parabolic' or 'ellipse'
-length_nose = 0.305 # [m]
+shape_nose = 'ogive' # 'ogive' or 'double' or 'parabolic' or 'ellipse'
+length_nose = 0.640 # [m]
 
-diameter_tail = 0.1 # [m]
-length_tail = 0.1 # [m]
+diameter_tail = 0.0 # [m]
+length_tail = 0.0 # [m]
 
 offset_fin = 0.0 # [mm] from body end to fin end
-root_chord = 200.0 # [mm]
-tip_chord = 90.0 # [mm]
-leading_edge_chord = root_chord - tip_chord
-span = 130.0 # [mm]
-thickness_fin = 2.0 # [mm]
-young_modulus = 3.0 # [GPa]
+root_chord = 300.0 # [mm]
+tip_chord = 150.0 # [mm]
+leading_edge_chord = 150.0 #root_chord - tip_chord
+span = 160.0 # [mm]
+thickness_fin = 3.0 # [mm]
+young_modulus = 69.0 # [GPa]
 poisson_ratio = 0.3 # [-]
-max_altitude = 10000.0 # [m]
+max_altitude = 6000.0 # [m]
 #################################################
 
 def mm2m(value):
@@ -37,8 +37,8 @@ bf.initialize(diameter_body, length_body)
 nose = bf.Nose(shape_nose, length_nose)
 fin = bf.Fin(root_chord, tip_chord, leading_edge_chord, span, length_body-offset_fin-root_chord)
 fin.flutter_speed(young_modulus, poisson_ratio, thickness_fin, max_altitude)
-tail = bf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
-stage = bf.integral(length_cg, nose, fin, tail)
+# tail = bf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
+stage = bf.integral(length_cg, nose, fin)
 
 print('*=============Result==============*')
 print('Length of C.P.:', stage.Lcp, '[m]')
