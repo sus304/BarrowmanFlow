@@ -44,6 +44,7 @@ print('*=============Result==============*')
 print('Length of C.P.:', stage.Lcp, '[m]')
 print('Coefficient of Normal Force:', stage.CNa, '[deg^-1]')
 print('Coefficient of Pitch Damping Moment:', stage.Cmq, '[-]')
+print('Coefficient of Roll Damping Moment:', stage.Clp, '[-]')
 print('Flutter Velocity:', max(fin.Vf), '[m/s]')
 print('*=================================*')
 

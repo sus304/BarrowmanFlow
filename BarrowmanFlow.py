@@ -35,6 +35,7 @@ class AeroObj:
     self.CNa = 0.0
     self.inertia_coefficient = 0.0
     self.Cmq = 0.0
+    self.Clp = 0.0
     self.Cnr = 0.0
     self.Lcp = 0.0
 
@@ -96,6 +97,7 @@ class Fin(AeroObj):
     ramda = Ct / Cr
     MAC = 2.0 / 3.0 * Cr * (1 + ramda ** 2 / (1.0 + ramda)) # Mean Aerodynamic Chord
     self.Lcp = self.distance + (Cle * (Cr + 2.0 * Ct) / (3.0 * (Cr + Ct))) + MAC / 4.0
+    self.Clp = -4.0 * 2.0 * (span + 0.5 * AeroObj.d_body) ** 4 / (np.pi * AeroObj.l_body ** 2 * (0.25 * AeroObj.d_body ** 2 * np.pi))
 
   def flutter_speed(self, young, poisson, thickness, altitude=0.0):
     # ref. NACA Technical Note 4197
@@ -147,7 +149,7 @@ class Fin(AeroObj):
     self.Vf = [Std_Atmo(alt)[3] * np.sqrt(shear * 10.0 ** 9 / ((1.337 * AR ** 3 * Std_Atmo(alt)[1] * (ramda + 1.0)) / (2.0 * (AR + 2.0) * (thickness / self.Cr) ** 3))) for alt in np.arange(0.0, altitude+10.0, 10.0)]
 
 class Stage:
-  def __init__(self, d_body, l_body, Lcg, Lcp, CNa, Cmq, Cnr):
+  def __init__(self, d_body, l_body, Lcg, Lcp, CNa, Cmq, Cnr, Clp):
     self.d_body = d_body
     self.l_body = l_body
     self.Lcg = Lcg
@@ -155,6 +157,7 @@ class Stage:
     self.CNa = CNa
     self.Cmq = Cmq
     self.Cnr = Cnr
+    self.Clp = Clp
     self.components = []
   
   def plot(self):
@@ -166,13 +169,13 @@ def initialize(d_body, l_body):
   AeroObj.l_body = l_body
 
 def integral(Lcg, *components):
-  stage = Stage(AeroObj.d_body, AeroObj.l_body, Lcg, 0.0, 0.0, 0.0, 0.0)
+  stage = Stage(AeroObj.d_body, AeroObj.l_body, Lcg, 0.0, 0.0, 0.0, 0.0, 0.0)
   for obj in components:
     stage.CNa += obj.CNa
     stage.Lcp += obj.CNa * obj.Lcp
     stage.Cmq -= 4.0 * (0.5 * obj.CNa * ((obj.Lcp - Lcg) / AeroObj.l_body) ** 2)
+    stage.Clp += obj.Clp
     stage.components.append(obj)
-  stage.Clp = -AR/2pi
   stage.Lcp /= stage.CNa
 
   return stage
