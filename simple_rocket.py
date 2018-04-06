@@ -4,6 +4,7 @@ import BarrowmanFlow as bmf
 ################## User Input ###################
 length_body = 3.9663 # [m] from nose tip to body. without tail
 diameter_body = 0.183 # [m]
+mass_body = 7.0  # [kg]
 length_cg = 2.541 # [m] from nose tip
 
 shape_nose = 'ogive' # 'ogive' or 'double' or 'parabolic' or 'ellipse'
@@ -37,6 +38,7 @@ stage = bmf.Stage(diameter_body, length_body, length_cg)
 nose = bmf.Nose(stage, shape_nose, length_nose)
 fin = bmf.Fin(stage, root_chord, tip_chord, leading_edge_chord, span, length_body - offset_fin - root_chord)
 fin.flutter_speed(young_modulus, poisson_ratio, thickness_fin, altitude)
+length_cg = fin.center_of_gravity_for_fin()
 # tail = bmf.TaperBody(diameter_body, diameter_tail, length_tail, length_body)
 stage.integrate([nose, fin])
 
@@ -45,6 +47,7 @@ print('Length of C.P.:', stage.Lcp, '[m]')
 print('Coefficient of Normal Force:', stage.CNa, '[deg^-1]')
 print('Coefficient of Pitch Damping Moment:', stage.Cmq, '[-]')
 print('Coefficient of Roll Damping Moment:', stage.Clp, '[-]')
+print('Center of Gravity:', length_cg, '[m]')
 print('Flutter Velocity:', fin.Vf, '[m/s]')
 print('*=================================*')
 

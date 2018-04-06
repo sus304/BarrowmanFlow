@@ -144,6 +144,13 @@ class Fin:
         shear = young / (2.0 * (1.0 + poisson)) # shear modulus
         self.Vf = Std_Atmo(altitude)[3] * np.sqrt(shear * 10.0 ** 9 / ((1.337 * AR ** 3 * Std_Atmo(altitude)[1] * (ramda + 1.0)) / (2.0 * (AR + 2.0) * (thickness / self.Cr) ** 3)))
         return self.Vf
+    
+    def center_of_gravity_for_fin(self, mass_body, cg_body, thickness, rho_fin):
+        AR = (self.Cr + self.Ct) * self.span * 0.5
+        mass_fin = AR * thickness * rho_fin * 4
+        cg_fin = self.distance + (self.Cr - (self.Ct ** 2 + self.Cr * self.Ct + self.Cr ** 2) / (3.0 * (self.Cr + self.Ct)))
+        cg_move = (cg_body * mass_body + cg_fin * mass_fin) / (mass_body + mass_fin)
+        return cg_move / 1e3  # [m]
 
 
 class Stage:
