@@ -147,10 +147,10 @@ class Fin:
     
     def center_of_gravity_for_fin(self, mass_body, cg_body, thickness, rho_fin):
         AR = (self.Cr + self.Ct) * self.span * 0.5
-        mass_fin = AR * thickness * rho_fin * 4
+        self.mass_fin = AR * thickness * rho_fin * 4
         cg_fin = self.distance + (self.Cr - (self.Ct ** 2 + self.Cr * self.Ct + self.Cr ** 2) / (3.0 * (self.Cr + self.Ct)))
-        cg_move = (cg_body * mass_body + cg_fin * mass_fin) / (mass_body + mass_fin)
-        return cg_move / 1e3  # [m]
+        cg_move = (cg_body * mass_body + cg_fin * self.mass_fin) / (mass_body + self.mass_fin)
+        return cg_move  # [m]
 
 
 class Stage:
@@ -285,7 +285,7 @@ class FinOptimize:
 
     def solve(self, config):
         cons = ({'type':'eq', 'fun': lambda param:self.equality(param, config)}, {'type':'ineq', 'fun': lambda param:self.inequality(param, config)})
-        result = minimize(self.cost, self.param_init, args=(config,), constraints=cons, method='SLSQP', options={'maxiter': 100})#, 'disp': True, })
+        result = minimize(self.cost, self.param_init, args=(config,), constraints=cons, method='SLSQP', options={'maxiter': 300})#, 'disp': True, })
         return result
 
 
